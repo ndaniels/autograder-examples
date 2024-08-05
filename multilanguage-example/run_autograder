@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Set up autograder files
+
+# if we find a rust submission
+targets="huffman"
+sub="/autograder/submission" # where student code is unpacked
+src="/autograder/source" # where the autograder code lives
+dest="/autograder/student" # destination to run student code
+
+if [ -f $sub/$targets/Cargo.toml ]; then
+	source $HOME/.cargo/env
+	contents="src Cargo.toml"
+	cd $src
+	for t in $targets ; do
+		mkdir -p $dest/$t
+		for c in $contents ; do
+			cp -r $sub/$t/$c $dest/$t/
+		done
+	done
+
+	for t in $targets ; do
+		cd $dest/$t
+		RUSTFLAGS=-Dwarnings cargo build --release 2>$dest/$t/errors.txt
+	done
+
+	# we expect then a $dest/$t/target/release/huffman
+	# in other words /autograder/student/huffman/target/release/huffman
+
+# now consider the possibility of a Makefile-based solution (e.g. C)
+elif [ -f $sub/$targets/Makefile ]; then
+	mkdir -p $dest
+	cp -r $targets/* $dest/$targets
+	cd $dest/$targets
+	make # we expect then a $dest/$targets/huffman
+	# in other words /autograder/student/huffman/huffman
+# otherwise this is assumed to be a python solution in a single file
+else
+	mkdir -p /autograder/student
+	cp /autograder/submission/huffman.py /autograder/student/huffman.py
+fi
+
+# now run the tests,
+cd /autograder/source
+python3 run_tests.py > /autograder/results/results.json

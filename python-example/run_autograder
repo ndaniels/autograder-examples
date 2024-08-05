@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cp /autograder/submission/convex_hull.py /autograder/source/convex_hull.py
+
+cd /autograder/source
+
+python3 test_hull.py > /autograder/results/results.json
